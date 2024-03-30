@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/NYTimes/gziphandler"
+	"golang.org/x/net/http2"
 
 	"github.com/rs/cors"
 
@@ -30,8 +31,8 @@ import (
 )
 
 const (
-	baseURL           = "/ext"
-	readHeaderTimeout = 10 * time.Second
+	baseURL              = "/ext"
+	maxConcurrentStreams = 64
 )
 
 var (
@@ -66,6 +67,7 @@ type Server interface {
 	// Initialize creates the API server at the provided host and port
 	Initialize(log logging.Logger,
 		factory logging.Factory,
+		httpConfig *HTTPConfig,
 		host string,
 		port uint16,
 		allowedOrigins []string,
@@ -94,6 +96,13 @@ type Server interface {
 	Shutdown() error
 }
 
+type HTTPConfig struct {
+	ReadTimeout       time.Duration `json:"readTimeout"`
+	ReadHeaderTimeout time.Duration `json:"readHeaderTimeout"`
+	WriteTimeout      time.Duration `json:"writeHeaderTimeout"`
+	IdleTimeout       time.Duration `json:"idleTimeout"`
+}
+
 type server struct {
 	// log this server writes to
 	log logging.Logger
@@ -111,6 +120,8 @@ type server struct {
 	router *router
 
 	srv *http.Server
+
+	httpConfig *HTTPConfig
 }
 
 // New returns an instance of a Server.
@@ -121,6 +132,7 @@ func New() Server {
 func (s *server) Initialize(
 	log logging.Logger,
 	factory logging.Factory,
+	httpConfig *HTTPConfig,
 	host string,
 	port uint16,
 	allowedOrigins []string,
@@ -130,6 +142,7 @@ func (s *server) Initialize(
 ) {
 	s.log = log
 	s.factory = factory
+	s.httpConfig = httpConfig
 	s.listenHost = host
 	s.listenPort = port
 	s.shutdownTimeout = shutdownTimeout
@@ -157,6 +170,24 @@ func (s *server) Initialize(
 	}
 }
 
+func (s *server) newHttpServer(listenAddress string) (*http.Server, error) {
+	httpServer := &http.Server{
+		Addr:              listenAddress,
+		ReadTimeout:       s.httpConfig.ReadTimeout,
+		ReadHeaderTimeout: s.httpConfig.ReadHeaderTimeout,
+		WriteTimeout:      s.httpConfig.WriteTimeout,
+		IdleTimeout:       s.httpConfig.IdleTimeout,
+		Handler:           s.handler,
+	}
+	err := http2.ConfigureServer(httpServer, &http2.Server{
+		MaxConcurrentStreams: maxConcurrentStreams,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return httpServer, nil
+}
+
 func (s *server) Dispatch() error {
 	listenAddress := fmt.Sprintf("%s:%d", s.listenHost, s.listenPort)
 	listener, err := net.Listen("tcp", listenAddress)
@@ -176,9 +207,9 @@ func (s *server) Dispatch() error {
 		)
 	}
 
-	s.srv = &http.Server{
-		Handler:           s.handler,
-		ReadHeaderTimeout: readHeaderTimeout,
+	s.srv, err = s.newHttpServer("")
+	if err != nil {
+		return err
 	}
 	return s.srv.Serve(listener)
 }
@@ -211,10 +242,9 @@ func (s *server) DispatchTLS(certBytes, keyBytes []byte) error {
 		)
 	}
 
-	s.srv = &http.Server{
-		Addr:              listenAddress,
-		Handler:           s.handler,
-		ReadHeaderTimeout: readHeaderTimeout,
+	s.srv, err = s.newHttpServer(listenAddress)
+	if err != nil {
+		return err
 	}
 	return s.srv.Serve(listener)
 }

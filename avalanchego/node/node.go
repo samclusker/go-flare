@@ -562,6 +562,7 @@ func (n *Node) initAPIServer() error {
 		n.APIServer.Initialize(
 			n.Log,
 			n.LogFactory,
+			&n.Config.HTTPConfig.HTTPConfig,
 			n.Config.HTTPHost,
 			n.Config.HTTPPort,
 			n.Config.APIAllowedOrigins,
@@ -579,6 +580,7 @@ func (n *Node) initAPIServer() error {
 	n.APIServer.Initialize(
 		n.Log,
 		n.LogFactory,
+		&n.Config.HTTPConfig.HTTPConfig,
 		n.Config.HTTPHost,
 		n.Config.HTTPPort,
 		n.Config.APIAllowedOrigins,

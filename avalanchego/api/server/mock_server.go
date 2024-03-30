@@ -261,9 +261,9 @@ func (mr *MockServerMockRecorder) DispatchTLS(certBytes, keyBytes interface{}) *
 }
 
 // Initialize mocks base method.
-func (m *MockServer) Initialize(log logging.Logger, factory logging.Factory, host string, port uint16, allowedOrigins []string, shutdownTimeout time.Duration, nodeID ids.NodeID, wrappers ...Wrapper) {
+func (m *MockServer) Initialize(log logging.Logger, factory logging.Factory, httpConfig *HTTPConfig, host string, port uint16, allowedOrigins []string, shutdownTimeout time.Duration, nodeID ids.NodeID, wrappers ...Wrapper) {
 	m.ctrl.T.Helper()
-	varargs := []interface{}{log, factory, host, port, allowedOrigins, shutdownTimeout, nodeID}
+	varargs := []interface{}{log, factory, &HTTPConfig{}, host, port, allowedOrigins, shutdownTimeout, nodeID}
 	for _, a := range wrappers {
 		varargs = append(varargs, a)
 	}

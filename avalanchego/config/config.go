@@ -18,6 +18,7 @@ import (
 
 	"github.com/spf13/viper"
 
+	"github.com/ava-labs/avalanchego/api/server"
 	"github.com/ava-labs/avalanchego/app/runner"
 	"github.com/ava-labs/avalanchego/chains"
 	"github.com/ava-labs/avalanchego/genesis"
@@ -240,6 +241,12 @@ func getHTTPConfig(v *viper.Viper) (node.HTTPConfig, error) {
 	}
 
 	config := node.HTTPConfig{
+		HTTPConfig: server.HTTPConfig{
+			ReadTimeout:       v.GetDuration(HTTPReadTimeoutKey),
+			ReadHeaderTimeout: v.GetDuration(HTTPReadHeaderTimeoutKey),
+			WriteTimeout:      v.GetDuration(HTTPWriteTimeoutKey),
+			IdleTimeout:       v.GetDuration(HTTPIdleTimeoutKey),
+		},
 		APIConfig: node.APIConfig{
 			APIIndexerConfig: node.APIIndexerConfig{
 				IndexAPIEnabled:      v.GetBool(IndexEnabledKey),
