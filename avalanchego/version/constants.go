@@ -148,7 +148,7 @@ var (
 		constants.CostwoID:     time.Date(10000, time.December, 1, 0, 0, 0, 0, time.UTC),
 		constants.StagingID:    time.Date(10000, time.December, 1, 0, 0, 0, 0, time.UTC),
 		constants.LocalFlareID: time.Date(10000, time.December, 1, 0, 0, 0, 0, time.UTC),
-		constants.CostonID:     time.Date(10000, time.December, 1, 0, 0, 0, 0, time.UTC),
+		constants.CostonID:     time.Date(2025, time.February, 21, 13, 30, 0, 0, time.UTC),
 		constants.SongbirdID:   time.Date(10000, time.December, 1, 0, 0, 0, 0, time.UTC),
 		constants.LocalID:      time.Date(10000, time.December, 1, 0, 0, 0, 0, time.UTC),
 	}
