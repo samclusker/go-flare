@@ -89,7 +89,7 @@ var (
 	DurangoTimes = map[uint32]time.Time{
 		constants.MainnetID:    time.Date(2024, time.March, 6, 16, 0, 0, 0, time.UTC),
 		constants.FlareID:      time.Date(10000, time.December, 1, 0, 0, 0, 0, time.UTC),
-		constants.CostwoID:     time.Date(10000, time.December, 1, 0, 0, 0, 0, time.UTC),
+		constants.CostwoID:     time.Date(2025, time.June, 4, 12, 0, 0, 0, time.UTC),
 		constants.LocalFlareID: time.Date(2025, time.May, 15, 14, 0, 0, 0, time.UTC),
 		constants.CostonID:     time.Date(2025, time.June, 4, 12, 0, 0, 0, time.UTC),
 		constants.SongbirdID:   time.Date(10000, time.December, 1, 0, 0, 0, 0, time.UTC),
